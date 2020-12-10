@@ -1,84 +1,83 @@
-
 <!DOCTYPE html>
 <html>
+
 <head>
-<title></title>
-<style type="text/css">
-    .header {
-       padding: 4px;
-    }
-    
-    .content {
-       margin-top: 10px;
-    }
-    
-    .menu {
-       position: absolute;
-       display: flex;
-       bottom:150px;
-       margin: 0 20px;
-    }
-    
-    .figure {
-       position: absolute;
-       left: 200px;
-       top:200px;
-    }
+   <title></title>
+   <style type="text/css">
+      .header {
+         padding: 4px;
+      }
 
-    .estimated-figure {
-       position: absolute;
-    }   
-      
-</style>
+      .content {
+         margin-top: 10px;
+      }
 
-<script>
-   "use strict";
-    
-    function $(id) {
-        return dom.getElementById(id)
-     }
-     
-     function dd(text){
-        $('dd').innerText = text
-     }
-     
-     function vv(text){
-        $("vv").innerText = text
-     }
-     
-     function attach(obj, ev, fn) {
+      .menu {
+         position: absolute;
+         display: flex;
+         bottom: 150px;
+         margin: 0 20px;
+      }
+
+      .figure {
+         position: absolute;
+         left: 200px;
+         top: 200px;
+      }
+
+      .estimated-figure {
+         position: absolute;
+      }
+   </style>
+
+   <script>
+      "use strict";
+
+      function $(id) {
+         return dom.getElementById(id)
+      }
+
+      function dd(text) {
+         $('dd').innerText = text
+      }
+
+      function vv(text) {
+         $("vv").innerText = text
+      }
+
+      function attach(obj, ev, fn) {
          obj.addEventListener(ev, fn)
-     }
-     
-     function detach(obj, ev, fn) {
-         obj.removeEventListener(ev, fn)
-     }
+      }
 
-     function setStyle(el, style){
-         for (let a in style){
+      function detach(obj, ev, fn) {
+         obj.removeEventListener(ev, fn)
+      }
+
+      function setStyle(el, style) {
+         for (let a in style) {
             el.style[a] = style[a]
          }
-     }
-     
-     function elt(el, cls, id, style){
+      }
+
+      function elt(el, cls, id, style) {
          let elm = dom.createElement(el)
          if (cls) elm.className = cls
          if (id) elm.setAttribute('id', id)
          if (style) setStyle(elm, style)
          return elm
-     }
-</script>
+      }
+   </script>
 
-<script>
+   <script>
 
-const userAgent = navigator.userAgent.toLowerCase(); 
-const Android = userAgent.indexOf("android") > -1; 
+      const userAgent = navigator.userAgent.toLowerCase();
+      const Android = userAgent.indexOf("android") > -1;
 
-</script>
+   </script>
 
-<script type="text/javascript">
+   <script type="text/javascript">
 
-const CONFIG = {
+      const CONFIG = {
          android: {
             click: 'touchstart',
             move: 'touchmove',
@@ -89,108 +88,139 @@ const CONFIG = {
             move: 'mousemove',
             end: 'mouseup'
          },
-         get(type){
+         get(type) {
             if (Android) {
                if (!this.android[type]) {
                   throw new Exception(`${type} is not defined`)
                }
                return this.android[type]
-            } 
+            }
             if (!this.ps[type]) {
-                  throw new Exception(`${type} is not defined`)
+               throw new Exception(`${type} is not defined`)
             }
             return this.ps[type];
          },
-         coords(e){
-            if (Android){
-               return {x: e.touches[0].clientX, y: e.touches[0].clientY}
+         coords(e) {
+            if (Android) {
+               return { x: e.touches[0].clientX, y: e.touches[0].clientY }
             }
-            return {x: e.clientX, y: e.clientY}
+            return { x: e.clientX, y: e.clientY }
          },
-         getScreenWidth(){
-            if (Android){
+         getScreenWidth() {
+            if (Android) {
                let ratio = window.devicePixelRatio || 1;
                return screen.width * ratio;
             }
             return window.innerWidth;
          },
-         getScreenHeight(){
-            if (Android){
+         getScreenHeight() {
+            if (Android) {
                let ratio = window.devicePixelRatio || 1;
-               return screen.height * ratio; 
+               return screen.height * ratio;
             }
             return window.innerHeight
          }
-     }
+      }
 
-const FIGURES = {
-         TYPE_1 : {
-           figure:  
-           `
-              ###
-              #
-              #
-            `,
-         },
-         
-         TYPE_2 : {
-            figure: 
-            `
-              ##
-              ##
-            `,
-         },
+      class State {
+         figure = null
 
-         TYPE_3 : {
-            figure: 
-            `
-              ##
-              #
-            `,
-         },
+         type = null       // This is Figure name. For example TYPE_1, TYPE_2, ... 
 
-         TYPE_4 : {
-            figure: 
-            `
-              ###
-            `,
-         },
+         boxDiv = null     // This is reference to Div element 
 
-         TYPE_5 : {
-            figure: 
-            `
-              #
-              #
-              #
-            `,
-         },
+         boxCoords = null  // This is coordinates of the found box
 
-         TYPE_6 : {
-            figure: 
-            `
-              ###
-              ###
-              ###
-            `,
-         },
+         isDrawable = {}   // Checks, whether or not figure can be drawn, e.g. there is enough place to put it.. 
 
-         TYPE_7 : {
+         allFigures = []   // Current figures that need to be drawn
+
+         set(obj) {
+            for (let a in obj) {
+               this[a] = obj[a]
+            }
+         }
+
+         reset() {
+            this.figure = null;
+            this.type = null;
+            this.boxDiv = null;
+            this.boxCoords = null;
+            this.isDrawable = {};
+            this.allFigures = [];
+         }
+      }
+
+      let state = new State()
+
+      const FIGURES = {
+         TYPE_1: {
             figure:
-            `
+               `
+              ###
+              #
+              #
+            `,
+         },
+
+         TYPE_2: {
+            figure:
+               `
+              ##
+              ##
+            `,
+         },
+
+         TYPE_3: {
+            figure:
+               `
+              ##
+              #
+            `,
+         },
+
+         TYPE_4: {
+            figure:
+               `
+              ###
+            `,
+         },
+
+         TYPE_5: {
+            figure:
+               `
+              #
+              #
+              #
+            `,
+         },
+
+         TYPE_6: {
+            figure:
+               `
+              ###
+              ###
+              ###
+            `,
+         },
+
+         TYPE_7: {
+            figure:
+               `
               #####
             `,
          },
 
-         TYPE_8 : {
+         TYPE_8: {
             figure:
-            `
+               `
               ####
             `,
          },
 
-         TYPE_9 : {
+         TYPE_9: {
             figure:
-            `
+               `
               #
               #
               #
@@ -198,620 +228,728 @@ const FIGURES = {
             `,
          },
 
-         TYPE_10 : {
+         TYPE_10: {
             figure:
-            `
+               `
              .#
              ##
             `
          }
 
-}
-
-class Figure {
-    static scaleK = 3;
-    cnt = null;
-
-    constructor(){ 
-       this.cnt = 3;
-    }
-
-    removeFigure() {
-       console.log("Figure to be removed", state.figure)
-       setStyle(state.boxDiv, {
-          visibility: 'hidden'
-       })
-       if (--this.cnt === 0) {
-          this.cnt = 3;
-          Figure.drawFigures();
-       }
-    }    
-
-    static getRandomFigures(cnt = 3) {
-      let keys = Object.keys(FIGURES);
-      let len = keys.length;
-      let randomFigures = [];
-
-      for (let i=0; i<cnt; i++) {
-         let ind = Math.floor(Math.random() * len);
-         randomFigures.push(keys[ind]);
       }
-      return randomFigures;
-    }
 
-    static drawFigures(){
-      $('menu').innerHTML = "";
+      class PlaceFinder {
 
-      let randomFigures = Figure.getRandomFigures();
-      randomFigures.forEach(figureType => {
-         Figure.drawFigure(figureType)
-      })
-    }
+         RUN_SLOW = 'runSLow';
+         type = null;
+         found = false;
 
-    static drawFigure(figureType) {
-      let type = figureType;
-      figure = FIGURES[type].figure
-         
-      figure = figure.split("\n")
-         .map(c => c.trim())
-         .filter(c => c)
-         .map(c => c.split(""))
-         
-      let marginLeft = width / 6.4 + 'px';
-         
-      let box = elt("box",null,null, {
-            position: "relative",
-            marginLeft: marginLeft,
-            marginRight: marginLeft
-      })
-         
-      let bw = boxWidth  / Figure.scaleK;
-      let bh = boxHeight / Figure.scaleK;
-         
-      Figure.draw(figure, bw, bh, box)
-      Event.register(box, figure, type)
-         
-      $("menu").append(box)
-    }
+         check(figureType, figure, divElement) {
+            this.type = figureType;
+            this.run(this.RUN_SLOW, { figure, divElement })
+         }
 
-    static draw(figure, bw, bh, box) {
-      figure.forEach((r, i) => {
-         r.forEach((c, j) => {
-            if (figure[i][j] !== ".") {
-               let l = j * (bw + 3);
-               let t = i * (bh + 3);
-         
-               let el = elt("div",null,null,{
-                  top:  t + "px",
-                  left: l + "px",
-                  width: bw + "px",
-                  height: bh + "px",
-                  border: "1px solid red",
-                  position: "absolute",
+         checkAll(figures) {
+            this.found = false;
+            figures.forEach(figure => {
+               this.check(figure.type, figure.figure, figure.div)
+            })
+            if (!this.found) {
+               game.lose();
+            }
+         }
+
+         run(TYPE, { figure, divElement }) {
+            const can = this.runSlow(figure)
+            this.update(can, divElement)
+         }
+
+         runSlow(figure) {
+            let found = false;
+            for (let i = 0; i < boxesOnRow && !found; i++) {
+               for (let j = 0; j < boxesOnColumn && !found; j++) {
+                  let can = this.tryToFit({ i, j }, figure)
+                  if (can) found = true;
+               }
+            }
+            return found;
+         }
+
+         tryToFit({ i, j }, figure) {
+            return painter.canBeDrawn({ x: i, y: j }, figure)
+         }
+
+         update(status, div) {
+            state.isDrawable[this.type] = status;
+            if (!status) {
+               setStyle(div, {
+                  opacity: '.3'
+               })
+            }
+            else {
+               this.found = true;
+               setStyle(div, {
+                  opacity: '1'
+               })
+            }
+         }
+
+      }
+
+      let placeFinder = new PlaceFinder();
+
+      class Figure {
+         static scaleK = 3;
+         cnt = null;
+
+         constructor() {
+            this.reset();
+         }
+
+         removeFigure() {
+            setStyle(state.boxDiv, {
+               visibility: 'hidden'
+            })
+            if (--this.cnt === 0) {
+               this.cnt = 3;
+               Figure.drawFigures();
+            }
+         }
+
+         static getRandomFigures(cnt = 3) {
+            let keys = Object.keys(FIGURES);
+            let len = keys.length;
+            let randomFigures = [];
+
+            for (let i = 0; i < cnt; i++) {
+               let ind = Math.floor(Math.random() * len);
+               randomFigures.push(keys[ind]);
+            }
+            return randomFigures;
+         }
+
+         static drawFigures() {
+            $('menu').innerHTML = "";
+
+            let randomFigures = Figure.getRandomFigures();
+            randomFigures.forEach(figureType => {
+               Figure.drawFigure(figureType)
+            })
+            placeFinder.checkAll(state.allFigures)
+         }
+
+         static drawFigure(figureType) {
+            let type = figureType;
+            figure = FIGURES[type].figure
+            figure = figure.split("\n")
+               .map(c => c.trim())
+               .filter(c => c)
+               .map(c => c.split(""))
+
+            let marginLeft = width / 6.4 + 'px';
+            let box = elt("box", null, null, {
+               position: "relative",
+               marginLeft: marginLeft,
+               marginRight: marginLeft
+            })
+
+            const bw = boxWidth / Figure.scaleK;
+            const bh = boxHeight / Figure.scaleK;
+
+            Figure.draw(figure, bw, bh, box)
+            Event.register(box, figure, type)
+
+            state.allFigures.push({
+               type: figureType,
+               figure,
+               div: box,
+            })
+
+            $("menu").append(box)
+         }
+
+         static draw(figure, bw, bh, box, style = {}) {
+            figure.forEach((r, i) => {
+               r.forEach((c, j) => {
+                  if (figure[i][j] !== ".") {
+                     let l = j * (bw + 3);
+                     let t = i * (bh + 3);
+
+                     let el = elt("div", null, null, {
+                        top: t + "px",
+                        left: l + "px",
+                        width: bw + "px",
+                        height: bh + "px",
+                        background: 'orange',
+                        position: "absolute",
+                     })
+                     setStyle(el, style)
+                     box.append(el);
+                  }
+               })
+            })
+         }
+
+         reset() {
+            this.cnt = 3;
+         }
+      }
+
+      let figureHelper = new Figure();
+
+      class Finder {
+         x = null
+         y = null
+         len = null;
+         prevBox = null;
+         backTrack = false;
+
+         constructor() {
+            this.reset();
+         }
+
+         reset() {
+            this.x = this.y = this.len = 4;
+            this.shown = false;
+         }
+
+         getNextPartition() {
+            let type = this.len;
+
+            if (type == 4) {
+               return 2;
+            } else if (type == 3) {
+               return 1;
+            } else {
+               return 1;
+            }
+         }
+
+         update(typeX, typeY) {
+            if (this.len === 1) {
+               if (typeX == 1) typeX = 0;
+               if (typeY == 1) typeY = 0;
+            }
+
+            if (this.backTrack) {
+               setStyle(boxesArray[this.x][this.y].div, {
+                  background: 'rgba(200, 0, 0, .3)'
+               })
+            }
+
+            let len = this.getNextPartition();
+
+            if (typeX == '-1') {
+               this.y -= len
+            } else if (typeX == '1') {
+               this.y += len
+            }
+
+            if (typeY == '-1') {
+               this.x -= len
+            } else if (typeY == '1') {
+               this.x += len
+            }
+
+            this.len /= 2;
+            if (this.len < 1) this.len = 0;
+
+            // if (this.len === 0) this.matchBox();
+         }
+
+         isDone() {
+            return this.len === 0;
+         }
+
+         getX() {
+            return boxesArray[this.x][this.y].x;
+         }
+
+         getY() {
+            return boxesArray[this.x][this.y].y;
+         }
+
+         getCoords() {
+            let coords = boxesArray[this.x][this.y];
+            return { x: coords.x, y: coords.y }
+         }
+
+         matchBox() {
+            if (this.prevBox) {
+               setStyle(this.prevBox, {
+                  background: 'rgba(0,0,0,.02)',
+               })
+            }
+            let div = boxesArray[this.x][this.y].div;
+
+            setStyle(div, {
+               background: 'red',
+            })
+            this.prevBox = div;
+         }
+
+      }
+
+      let finder = new Finder();
+
+      class Painter {
+         canDraw = false;
+
+         drawTmpFigure({ x, y }, figure) {
+            this.canDraw = this.canBeDrawn({ x, y }, figure);
+            if (!this.canDraw) {
+               this.clearTmpFigure();
+               return;
+            }
+
+            let box = $('estimated-figure')
+            let block = boxesArray[x][y];
+            let [x1, y1] = [block.x, block.y];
+
+            setStyle(box, {
+               left: x1 + 'px',
+               top: y1 + 'px',
+               opacity: .4
+            })
+
+            Figure.draw(figure, boxWidth * .97, boxHeight * .97, box)
+         }
+
+         clearTmpFigure() {
+            $('estimated-figure').innerHTML = "";
+         }
+
+         canBeDrawn({ x, y }, figure) {
+            if (x == undefined || y == undefined) {
+               return false;
+            }
+
+            let lx = 0, ly = 0;
+            let busy = false;
+
+            figure.forEach((r, i) => {
+               if (busy) return;
+               r.forEach((c, j) => {
+                  if (busy) return;
+                  if (figure[i][j] !== '.') {
+                     lx = Math.max(lx, i);
+                     ly = Math.max(ly, j);
+                     if (i + x < boxesOnRow && j + y < boxesOnColumn) {
+                        if (boxesArray[x + i][y + j].busy == 1) {
+                           busy = true;
+                        }
+                     } else {
+                        busy = true;
+                     }
+                  }
+               })
+            })
+
+            let can = ((x + lx) < boxesOnRow) && ((y + ly) < boxesOnColumn);
+            if (busy) {
+               can = false;
+            }
+            // this.canDraw = can;
+
+            return can;
+         }
+
+         tryToDraw() {
+            this.clearTmpFigure();
+            if (state.boxCoords && state.figure) {
+               this.canDraw = this.canBeDrawn(state.boxCoords, state.figure)
+            } else {
+               this.canDraw = false;
+            }
+            if (!this.canDraw) {
+               return;
+            }
+            this.draw();
+            figureHelper.removeFigure();
+            this.update()
+         }
+
+         draw() {
+            let figure = state.figure;
+            let { x, y } = state.boxCoords;
+
+            figure.forEach((r, i) => {
+               r.forEach((c, j) => {
+                  if (figure[i][j] !== '.') {
+                     setStyle(boxesArray[x + i][y + j].div, {
+                        background: 'orange',
+                        border: '1px solid white',
+                     })
+                     //  console.log("updated")
+                     remover.update({ x: x + i, y: y + j });
+                  }
+               })
+            })
+            remover.cleanUp()
+         }
+
+         update() {
+            let removed = false;
+            state.allFigures = state.allFigures.filter(({ type }) => {
+               if (removed) return true;
+               removed = (type === state.type)
+               return !removed
+            })
+            state.isDrawable = {}
+            placeFinder.checkAll(state.allFigures)
+            console.log(state.isDrawable)
+         }
+      }
+
+      let painter = new Painter();
+
+      class Remover {
+         onRow = [];
+         onColumn = [];
+
+         constructor() {
+
+         }
+
+         update({ x, y }) {
+            if (this.onColumn[y]) {
+               this.onColumn[y]++;
+            } else {
+               this.onColumn[y] = 1;
+            }
+
+            if (this.onRow[x]) {
+               this.onRow[x]++;
+            } else {
+               this.onRow[x] = 1;
+            }
+
+            boxesArray[x][y].busy = true;
+         }
+
+         cleanUp() {
+            let removedColumns = 0;
+
+            for (let i = 0; i < boxesOnColumn; i++) {
+               if (this.onColumn[i] === boxesOnColumn) {
+                  this.remove(i, boxesOnRow, 'row');
+                  removedColumns++;
+                  this.onColumn[i] = 0;
+               }
+            }
+
+            for (let i = 0; i < boxesOnRow; i++) {
+               if (this.onRow[i] === boxesOnRow) {
+                  this.remove(i, boxesOnColumn, 'column', (i) => {
+                     if (this.onColumn[i]) {
+                        this.onColumn[i]--;
+                     }
+                  })
+                  this.onRow[i] = 0;
+               }
+               else {
+                  this.onRow[i] -= removedColumns;
+               }
+            }
+
+            console.log("column", this.onColumn);
+            console.log("row", this.onRow);
+         }
+
+         remove(a, b, type, fn) {
+            for (let i = 0; i < b; i++) {
+               let box = boxesArray[i][a];
+               if (type === 'column') box = boxesArray[a][i];
+
+               if (fn) fn(i);
+
+               if (!box.busy) continue;
+               box.busy = false;
+
+               setStyle(box.div, {
+                  background: 'brown',
+                  border: '2px solid white'
                })
 
-               box.append(el);
-            }  
-         })
-      })
-   }
-}
-
-let figureHelper = new Figure();
-
-class Finder {
-   x=null
-   y=null
-   len=null;
-   prevBox=null;
-   backTrack=false;
-
-   constructor(){
-        this.reset();
-   }
-
-   reset(){
-      this.x = this.y = this.len = 4;
-      this.shown = false;
-   }
-
-   getNextPartition() {
-      let type = this.len;
-
-      if (type == 4) {
-         return 2;
-      } else if (type == 3) {
-         return 1;
-      } else {
-         return 1;
-      }  
-   }
-
-   update(typeX, typeY) {
-      if (this.len === 1){
-         if (typeX == 1) typeX = 0;
-         if (typeY == 1) typeY = 0;
-      }
-
-      if (this.backTrack){
-         setStyle(boxesArray[this.x][this.y].div, {
-             background: 'rgba(200, 0, 0, .3)'
-         })
-      }
-      
-      let len = this.getNextPartition();
-
-      if (typeX == '-1') {
-         this.y -= len
-      } else if (typeX == '1') {
-         this.y += len
-      }
-   
-      if (typeY == '-1') {
-         this.x -= len
-      } else if (typeY == '1') {
-         this.x += len
-      }
-
-      this.len /= 2;
-      if (this.len < 1) this.len = 0;
-
-      // if (this.len === 0) this.matchBox();
-   }
-
-   isDone() {
-      return this.len === 0;
-   }
-
-   getX() {
-      return boxesArray[this.x][this.y].x;
-   }
-
-   getY() {
-      return boxesArray[this.x][this.y].y;
-   }
-
-   getCoords() {
-      let coords = boxesArray[this.x][this.y];
-      return {x: coords.x, y: coords.y}
-   }
-
-   matchBox() {
-      if (this.prevBox){
-         setStyle(this.prevBox, {
-            background: 'rgba(0,0,0,.02)',
-         })
-      }
-      let div = boxesArray[this.x][this.y].div;
-
-      setStyle(div, {
-         background: 'red',
-      })
-      this.prevBox = div;
-   }
-
-}
-
-let finder = new Finder();
-
-class Painter {
-   canDraw = false;
-
-   constructor() {
-
-   }
-
-   drawTmpFigure({x, y}, figure){
-      this.canBeDrawn({x, y}, figure);
-      if (!this.canDraw) {
-         this.clearTmpFigure();
-         return;
-      }
-
-      let box = $('estimated-figure')
-      let block = boxesArray[x][y];
-      let [x1,y1] = [block.x, block.y];
-
-      setStyle(box, {
-         left: x1 + 'px',
-         top:  y1 + 'px',
-      })
-
-      Figure.draw(figure, boxWidth * .97, boxHeight * .97, box)
-   }
-
-   clearTmpFigure(){
-      $('estimated-figure').innerHTML = "";
-   }
- 
-   canBeDrawn({x, y}, figure) {
-      if (x == undefined || y == undefined) {
-         this.canDraw = false; 
-         return;
-      }
-
-      let lx = 0, ly = 0;
-      let busy = false;
-
-      figure.forEach((r, i) => {
-         if (busy) return;
-         r.forEach((c, j) => {
-             if (busy) return;
-             if (figure[i][j] !== '.') {
-                lx = Math.max(lx, i);
-                ly = Math.max(ly, j);
-                if (i + x < boxesOnRow && j + y < boxesOnColumn) {
-                  if (boxesArray[x + i][y + j].busy == 1) {
-                   busy = true;
-                  }
-                } else {
-                   busy = true;
-                }
-             }
-         })
-      })
-
-      let can = ((x + lx) < boxesOnRow) && ((y + ly) < boxesOnColumn);
-      if (busy){ 
-          can = false;
-      }
-      this.canDraw = can;
-
-      return can;
-   }
-
-   tryToDraw() {
-      this.clearTmpFigure();
-      if (state.boxCoords && state.figure) {
-         this.canBeDrawn(state.boxCoords, state.figure)
-      } else {
-         this.canDraw = false;
-      }
-      if (!this.canDraw) {
-          return;
-      }
-      this.draw();
-      figureHelper.removeFigure();
-   }
-
-   draw() {
-      let figure = state.figure;
-      let {x, y} = state.boxCoords;
-
-      figure.forEach((r, i) => {
-         r.forEach((c, j) => {
-             if (figure[i][j] !== '.') {
-                setStyle(boxesArray[x + i][y + j].div, {
-                   background: 'orange',
-                   border: '1px solid white',
-                })
-               //  console.log("updated")
-                remover.update({x: x + i, y: y + j});
-             }
-         })
-      })
-      remover.cleanUp()
-      // console.log('updated boxes', boxesArray)
-   }
-}
-
-let painter = new Painter();
-
-class Remover {
-   onRow = [];
-   onColumn = [];
-
-   constructor() {
-        
-   }
-
-   update({x, y}) {
-      if (this.onColumn[y]) {
-         this.onColumn[y]++;
-      } else {
-         this.onColumn[y] = 1;
-      }
-
-      if (this.onRow[x]) {
-         this.onRow[x]++;
-      } else {
-         this.onRow[x] = 1;
-      }
-
-      boxesArray[x][y].busy = true;
-   }
-
-   cleanUp() {
-      let removedColumns = 0;
-
-      for (let i=0; i<boxesOnColumn; i++){
-         if (this.onColumn[i] === boxesOnColumn) {
-             this.remove(i, boxesOnRow, 'row');
-             removedColumns++;
-             this.onColumn[i] = 0;
+               setTimeout(() => {
+                  setStyle(box.div, {
+                     background: 'rgba(0,0,0,.02)',
+                     border: '1px solid rgba(0,0,0,.051)'
+                  })
+               }, 300)
+            }
          }
-      }
 
-      for (let i=0; i<boxesOnRow; i++){
-         if (this.onRow[i] === boxesOnRow) {
-            this.remove(i, boxesOnColumn, 'column', (i) => {
-               if (this.onColumn[i]) {
-                  this.onColumn[i]--;
-               } 
-            })
-            this.onRow[i] = 0;
-         } 
-         else {
-            this.onRow[i] -= removedColumns;
+         reset() {
+            this.onColumn = [];
+            this.onRow = [];
          }
+
       }
 
-      console.log("column", this.onColumn);
-      console.log("row", this.onRow);
-   }
+      let remover = new Remover();
 
-   remove(a, b, type, fn) {
-      for (let i=0; i<b; i++){
-         let box = boxesArray[i][a];
-         if (type === 'column') box = boxesArray[a][i];
+      class Layout {
+         static init() {
+            Layout.initBoxes()
+            Layout.createLayout();
+         }
 
-         if (fn) fn(i);
+         static initBoxes() {
+            boxesArray = [];
+            for (let i = 0; i < boxesOnColumn; i++) {
+               boxesArray.push([])
+               for (let j = 0; j < boxesOnRow; j++) {
+                  let x = j * (boxWidth + 1) + offsetX
+                  let y = i * (boxHeight + 1) + offsetY
+                  boxesArray[i].push({ x, y })
+               }
+            }
+         }
 
-         if (!box.busy) continue;
-         box.busy = false;
+         static createLayout() {
+            $("content").innerHTML = "";
 
-         setStyle(box.div, {
-            background: 'brown',
-            border: '2px solid white'
-         })
+            for (let i = 0; i < boxesOnColumn; i++) {
+               for (let j = 0; j < boxesOnRow; j++) {
+                  let box = boxesArray[i][j]
+                  Layout.createSingleBlock(box)
+               }
+            }
+         }
 
-         setTimeout(() => {
-            setStyle(box.div, {
+         static createSingleBlock(box) {
+            let el = elt('div', "box", null, {
+               position: 'absolute',
+               width: (boxWidth + 0) + "px",
+               height: (boxHeight + 0) + "px",
+               left: box.x + 'px',
+               top: box.y + 'px',
                background: 'rgba(0,0,0,.02)',
                border: '1px solid rgba(0,0,0,.051)'
             })
-         }, 300)
-      }
-   }
 
-}
+            el.onmousedown = (e) => e.preventDefault()
 
-let remover = new Remover();
+            $("content").append(el)
 
-let state = {
-   figure: null,
-   type: null,  // This is Figure name. For example TYPE_1, TYPE_2, ... 
-}
-
-class Layout {
-    static init(){ 
-       Layout.initBoxes()
-       Layout.createLayout();
-    }
-    
-    static initBoxes(){ 
-       boxesArray = [];
-       for (let i=0; i<boxesOnColumn; i++){
-           boxesArray.push([])
-           for(let j=0; j<boxesOnRow; j++){
-              let x = j * (boxWidth + 1)  + offsetX
-              let y = i * (boxHeight + 1) + offsetY
-              boxesArray[i].push({x,y})
-           }
-       }
-    }
-
-    static createLayout() {
-      $("content").innerHTML = "";
-
-      for (let i=0; i < boxesOnColumn;i++){
-         for(let j=0; j< boxesOnRow; j++){
-            let box = boxesArray[i][j]
-            Layout.createSingleBlock(box)
+            box.div = el
+            box.busy = 0
          }
       }
-    }
 
-    static createSingleBlock(box){ 
-         let el = elt('div', "box", null, {
-             position: 'absolute',
-             width: (boxWidth + 0) + "px",
-             height: (boxHeight + 0) + "px",
-             left: box.x + 'px',
-             top:  box.y + 'px',
-             background: 'rgba(0,0,0,.02)',
-             border: '1px solid rgba(0,0,0,.051)'
-         })
+      class Event {
 
-         el.onmousedown = (e) => e.preventDefault()
+         static register(box, figure, type) {
+            let mousePressed = null;
 
-         $("content").append(el)
-      
-         box.div = el
-         box.busy = 0
-    }
-}
+            function update(ev) {
+               moveFigure(ev)
+               BoxFinder.findAndDraw(ev)
+            }
 
-class Event {
+            function moveFigure(e) {
+               let { x, y } = CONFIG.coords(e);
+               x = x + figureOffsetX + 'px';
+               y = y + figureOffsetY + 'px';
 
-   static register(box, figure, type) {
+               setStyle($("figure"), {
+                  left: x,
+                  top: y,
+               })
+            }
 
-      function update(ev){
-         moveFigure(ev)
-         BoxFinder.findAndDraw(ev)
-      }
+            function clickEvent(e) {
+               e.preventDefault();
+               if (!state.isDrawable[type] || game.finished) return;
+               mousePressed = true;
 
-      function moveFigure(e){
-         let {x, y} = CONFIG.coords(e);
-         x = x + figureOffsetX + 'px';
-         y = y + figureOffsetY + 'px';
+               state.set({
+                  figure,
+                  boxDiv: box,
+                  type,
+                  boxCoords: null
+               })
 
-         setStyle($("figure"), {
-            left: x,
-            top:  y,
-         })  
-      }
+               Figure.draw(figure, boxWidth * .96, boxHeight * .96, $("figure"),
+                  {
+                     boxShadow: '1px 1px 3px lightgrey, -1px -1px 3px lightgrey',
+                     borderRadius: '3px',
+                  })
+               setStyle(box, {
+                  opacity: .3,
+               })
+               update(e)
+            }
 
-      function clickEvent(e) {
-         e.preventDefault();
-         mousePressed = true;
+            function endEvent(e) {
+               if (!state.isDrawable[type] || game.finished) return;
+               setStyle(box, {
+                  opacity: "1"
+               })
+               $("figure").innerHTML = ""
+               if (mousePressed) {
+                  painter.tryToDraw();
+                  mousePressed = false;
+               }
+            }
 
-         state.figure = figure;
-         state.boxDiv = box;
-         state.type = type;
-         state.boxCoords = null;
+            attach(box, CONFIG.get('click'), (e) => {
+               clickEvent(e);
+               attach(dom, CONFIG.get("move"), update)
+               attach(dom, CONFIG.get("end"), end)
+            })
 
-         Figure.draw(figure, boxWidth * .96, boxHeight * .96, $("figure"))
-         setStyle(box, {
-            opacity:.3,
-         })
-         update(e)
-      }
-
-      function endEvent(e) {
-         setStyle(box, {
-            opacity: "1"
-         })
-         $("figure").innerHTML = ""
-         if (mousePressed) {
-            painter.tryToDraw(); 
-            mousePressed = false;
+            function end(ev) {
+               endEvent(ev);
+               detach(dom, CONFIG.get("move"), update)
+               detach(dom, CONFIG.get("end"), end)
+            }
          }
       }
-         
-      attach(box, CONFIG.get('click'), (e)=>{
-         clickEvent(e);
-         attach(dom, CONFIG.get("move"), update)
-         attach(dom, CONFIG.get("end"),  end)
-      })
 
-      function end(ev){
-         endEvent(ev);
-         detach(dom, CONFIG.get("move"), update)
-         detach(dom, CONFIG.get("end"),  end)
-      }
-   }
-}
+      class BoxFinder {
+         static findAndDraw(e) {
+            let { x, y } = CONFIG.coords(e);
 
-class BoxFinder {
-   static findAndDraw(e){
-      let{x,y} = CONFIG.coords(e);
-         
-      x = x + figureOffsetX;
-      y = y + figureOffsetY;
- 
-      state.status = "finding";
-      let sbox = BoxFinder.bestBox({x, y})
-      if (sbox === -1){
-        painter.clearTmpFigure()
-      }
-      state.status = "found";
-   }
+            x = x + figureOffsetX;
+            y = y + figureOffsetY;
 
-   static bestBox({x, y}) {
-      let errorX = boxWidth / 2;
-      let errorY = 10; 
-
-      if (x < offsetX - errorX){ 
-         console.log("X < 0");
-         painter.clearTmpFigure();
-         return -1;
-      }
-
-      if (y < offsetY - errorY) {
-         console.log("Y < 0");
-         painter.clearTmpFigure();
-         return -1;
-      }
-
-      
-      while (true) {
-         if (finder.isDone()) {
-            state.boxCoords = {x: finder.x, y: finder.y}
-            painter.drawTmpFigure({x: finder.x, y: finder.y}, state.figure)
-            finder.reset()
-            break;
+            state.status = "finding";
+            let sbox = BoxFinder.bestBox({ x, y })
+            if (sbox === -1) {
+               painter.clearTmpFigure()
+            }
+            state.status = "found";
          }
-         let coords = finder.getCoords();
-         let [x1, y1] = [coords.x, coords.y]
-         let typeX = null, typeY = null;
 
-         if (x - errorX < x1 ) typeX = '-1';
-         if (x >= x1 - errorX) typeX =  '1';
-         if (y - errorY < y1 ) typeY = '-1';
-         if (y >= y1 - errorY) typeY =  '1';
+         static bestBox({ x, y }) {
+            let errorX = boxWidth / 2;
+            let errorY = 10;
 
-         finder.update(typeX, typeY);       
+            if (x < offsetX - errorX) {
+               console.log("X < 0");
+               painter.clearTmpFigure();
+               return -1;
+            }
+
+            if (y < offsetY - errorY) {
+               console.log("Y < 0");
+               painter.clearTmpFigure();
+               return -1;
+            }
+
+
+            while (true) {
+               if (finder.isDone()) {
+                  state.boxCoords = { x: finder.x, y: finder.y }
+                  painter.drawTmpFigure({ x: finder.x, y: finder.y }, state.figure)
+                  finder.reset()
+                  break;
+               }
+               let coords = finder.getCoords();
+               let [x1, y1] = [coords.x, coords.y]
+               let typeX = null, typeY = null;
+
+               if (x - errorX < x1) typeX = '-1';
+               if (x >= x1 - errorX) typeX = '1';
+               if (y - errorY < y1) typeY = '-1';
+               if (y >= y1 - errorY) typeY = '1';
+
+               finder.update(typeX, typeY);
+            }
+         }
       }
-   }
-}
 
-class Game {
-   start() {
-      Layout.init();
-      Figure.drawFigures()
-   }
-}
+      class Game {
+         finished = false;
 
-</script>
+         async start() {
+            await this.reset()
+            console.log("after reset", state)
+
+            Layout.init();
+            Figure.drawFigures()
+
+         }
+
+         lose() {
+            this.finished = true;
+            setTimeout(async () => {
+               alert("Oh no. You lost the game")
+               let yes = await confirm("Would you like to play it again ?")
+               if (yes) {
+                  this.start()
+               }
+            }, 700)
+
+         }
+
+         reset() {
+            state.reset();
+            remover.reset();
+            figureHelper.reset();
+            this.finished = false;
+         }
+      }
+
+   </script>
 </head>
+
 <body>
-  <p id="dd">gjg</p>
-  <p id="vv">gg</p>
-  
-  <div class="header" id="header"> 
-  
-  </div>
-  
-  <div class="content" id="content">
-  
-  </div>
-  
-  <div class="menu" id="menu" onclick="event.preventDefault()">
-  
-  </div>
-  
-  <div class="figure" id="figure">
-  
-  </div>
+   <p id="dd">gjg</p>
+   <p id="vv">gg</p>
 
-  <div class='estimated-figure' id='estimated-figure'>
+   <div class="header" id="header">
 
-  </div>
+   </div>
 
-  <script>
+   <div class="content" id="content">
+
+   </div>
+
+   <div class="menu" id="menu" onclick="event.preventDefault()">
+
+   </div>
+
+   <div class="figure" id="figure">
+
+   </div>
+
+   <div class='estimated-figure' id='estimated-figure'>
+
+   </div>
+
+   <script>
       const dom = document;
-     const width  = CONFIG.getScreenWidth() * .9;
-     const height = CONFIG.getScreenHeight();
-     const offsetY = height * 0.1;
-     let offsetX = 0;
-     const boxesOnRow = 8;
-     const boxesOnColumn = 8;
-     let boxHeight = (height * .7) / boxesOnColumn;
-     let boxWidth  = (width - offsetX) / boxesOnRow
-     boxWidth = boxHeight = Math.min(boxWidth, boxHeight);
-     let boxesArray = [];
-     const figureOffsetX = -70
-     const figureOffsetY = -200
-  </script>
+      const width = CONFIG.getScreenWidth() * .9;
+      const height = CONFIG.getScreenHeight();
+      const offsetY = height * 0.1;
+      let offsetX = 0;
+      const boxesOnRow = 8;
+      const boxesOnColumn = 8;
+      let boxHeight = (height * .7) / boxesOnColumn;
+      let boxWidth = (width - offsetX) / boxesOnRow
+      boxWidth = boxHeight = Math.min(boxWidth, boxHeight);
+      let boxesArray = [];
+      const figureOffsetX = -70
+      const figureOffsetY = -200
+   </script>
 
-  <script type="text/javascript">
+   <script type="text/javascript">
+      {
+         let roffsetX = offsetX + boxesOnRow * boxWidth
+         roffsetX = width - roffsetX;
+         offsetX = (offsetX + roffsetX) / 2 + 20;
+      }
 
-     let mousePressed = null;
-     {
-        let roffsetX = offsetX + boxesOnRow * boxWidth
-        roffsetX = width - roffsetX;
-        offsetX = (offsetX + roffsetX) / 2 + 20;
-     }
+      let game = new Game();
+      (() => {
+         game.start();
+      })()
 
-     let game = new Game();
 
-     function start(){
-       game.start();
-     }
-
-     start()
-
-  </script>
+   </script>
 </body>
+
 </html>
