@@ -28,6 +28,177 @@
       .estimated-figure {
          position: absolute;
       }
+
+      @keyframes _fallDown {
+         0% {
+            opacity: 1;
+            visibility: visible;
+            height: 0%;
+            border-bottom-left-radius: 90%;
+            border-bottom-right-radius: 90%;
+         }
+
+         10% {
+            height: '10%';
+            border-bottom-right-radius: 100%;
+            border-bottom-left-radius: 100%;
+         }
+
+         50% {
+            height: '50%';
+            border-bottom-left-radius: 70%;
+            border-bottom-right-radius: 70%;
+         }
+
+         100% {
+            height: 100%;
+            ;
+            border-bottom-right-radius: 0%;
+            border-bottom-left-radius: 0%;
+         }
+      }
+
+      @keyframes _fallUp {
+         0% {
+            height: 100%;
+            border-bottom-right-radius: 0%;
+            border-bottom-left-radius: 0%;
+         }
+
+         50% {
+            height: '50%';
+            border-bottom-left-radius: 70%;
+            border-bottom-right-radius: 70%;
+         }
+
+         90% {
+            height: '10%';
+            border-bottom-right-radius: 100%;
+            border-bottom-left-radius: 100%;
+         }
+
+         100% {
+            opacity: 0;
+            visibility: hidden;
+            height: 0%;
+            border: none;
+            box-shadow: none;
+         }
+      }
+
+      #backdrop {
+         width: 100%;
+         margin-top: -20px;
+         margin-left: -20px;;
+         position: absolute;
+         background-color: #030e1d;
+         transition: all 4s ease-in;
+      }
+
+      .fallDown {
+         animation: _fallDown .4s ease-in-out;
+         animation-fill-mode: forwards;
+      }
+
+      .fallUp {
+         animation: _fallUp .4s ease-in-out;
+         animation-fill-mode: forwards;
+      }
+
+      body {
+         background: #293039;
+         overflow: hidden;
+      }
+
+      .menu-buttons {
+         position: absolute;
+         width: 240;
+         top: 20%;
+         left: calc(50% - 120px);
+      }
+
+      .menu-button {
+         width: 240px;
+         padding: 4px;
+         margin-top: 10px;
+         background-color: #52403B;
+         border-radius: 50px;
+         cursor: pointer;
+      }
+
+      .inner-button {
+         margin: 5px;
+         width: calc(100% - 20px);
+         border-radius: 50px;
+         border: .2rem solid yellow;
+      }
+
+      .button-background {
+         background-color: #2D221F;
+         border-radius: 50px;
+         padding: 6px;
+         text-align: left;
+         transition: all .4s ease-in;
+      }
+
+      .circle {
+         width: 20px;
+         height: 20px;
+         border-radius: 50%;
+         background: yellow;
+         margin-left: 5px;
+         margin-right: 10px;
+      }
+
+      .text {
+         width: 70%;
+         text-align: center;
+         font-family: 'Courier New', Courier, monospace;
+         font-weight: bold;
+         padding: 1px;
+         color: white;
+      }
+
+      .menu-button:hover .button-background {
+         background: #110E0F;
+      }
+
+      .d-none {
+         display: none;
+         color: #4d7a7a;
+      }
+
+      .navbar {
+         margin: 0;
+         padding: 0;
+         position: absolute;
+         width: 100%;
+         height: 60px;
+         top: 0;
+         left: 0;
+         background: #0E1318;
+         display: flex;
+      }
+
+      .my-font {
+         font-family: 'Courier New', Courier, monospace;
+         color: white;
+      } 
+
+      .score {
+         margin-left: auto; 
+         margin-right: 5%;
+         display: flex;
+         padding: 10px;
+         font-weight: bolder;
+      }
+
+      .best {
+         color: orange;
+         text-shadow: 2px 2px 4px #0E1318;
+      }
+
+      /* #0E1318 */
    </style>
 
    <script>
@@ -380,7 +551,7 @@
                         left: l + "px",
                         width: bw + "px",
                         height: bh + "px",
-                        background: 'orange',
+                        background: boxColor,
                         position: "absolute",
                      })
                      setStyle(el, style)
@@ -577,8 +748,7 @@
                r.forEach((c, j) => {
                   if (figure[i][j] !== '.') {
                      setStyle(boxesArray[x + i][y + j].div, {
-                        background: 'orange',
-                        border: '1px solid white',
+                        background: boxColor,
                      })
                      //  console.log("updated")
                      remover.update({ x: x + i, y: y + j });
@@ -597,7 +767,35 @@
             })
             state.isDrawable = {}
             placeFinder.checkAll(state.allFigures)
-            console.log(state.isDrawable)
+            // console.log(state.isDrawable)
+            Score.update()
+         }
+      }
+
+      class Score {
+         static async update(score = 15) {
+            const num = Math.floor(Math.random() * score) + 7
+            const parts = Math.floor(Math.random() * 7)
+
+            for (let i=0; i< parts; i++) {
+               await Score.add(Math.floor(num / parts))
+            }
+         }
+
+         static add(cnt) {
+              return new Promise((res, rej) => {
+                 setTimeout(() => {
+                    let score = $('score').innerText
+                    score = parseInt(score)
+                    score += cnt 
+                    $('score').innerText = score.toString()
+                    res()
+                 }, 70)
+              })
+         }
+
+         static reset() {
+            $('score').innerText = '0';
          }
       }
 
@@ -629,12 +827,14 @@
 
          cleanUp() {
             let removedColumns = 0;
-
+            let isRemoved = false;
+          
             for (let i = 0; i < boxesOnColumn; i++) {
                if (this.onColumn[i] === boxesOnColumn) {
                   this.remove(i, boxesOnRow, 'row');
                   removedColumns++;
                   this.onColumn[i] = 0;
+                  if (!isRemoved) isRemoved = true;
                }
             }
 
@@ -646,14 +846,16 @@
                      }
                   })
                   this.onRow[i] = 0;
+                  if (!isRemoved) isRemoved = true;
                }
                else {
                   this.onRow[i] -= removedColumns;
                }
             }
 
-            console.log("column", this.onColumn);
-            console.log("row", this.onRow);
+            if (isRemoved) Score.update(50)
+            // console.log("column", this.onColumn);
+            // console.log("row", this.onRow);
          }
 
          remove(a, b, type, fn) {
@@ -667,14 +869,13 @@
                box.busy = false;
 
                setStyle(box.div, {
-                  background: 'brown',
-                  border: '2px solid white'
+                  background: 'cyan',
                })
 
                setTimeout(() => {
                   setStyle(box.div, {
-                     background: 'rgba(0,0,0,.02)',
-                     border: '1px solid rgba(0,0,0,.051)'
+                     background: '#1E1E1E',
+                     border: '2px solid black'
                   })
                }, 300)
             }
@@ -725,8 +926,8 @@
                height: (boxHeight + 0) + "px",
                left: box.x + 'px',
                top: box.y + 'px',
-               background: 'rgba(0,0,0,.02)',
-               border: '1px solid rgba(0,0,0,.051)'
+               background: '#1E1E1E',                //rgba(0,0,0,.02)
+               border: '2px solid black'       //1px solid rgba(0,0,0,.051)
             })
 
             el.onmousedown = (e) => e.preventDefault()
@@ -772,10 +973,10 @@
                })
 
                Figure.draw(figure, boxWidth * .96, boxHeight * .96, $("figure"),
-                  {
-                     boxShadow: '1px 1px 3px lightgrey, -1px -1px 3px lightgrey',
-                     borderRadius: '3px',
-                  })
+               {
+                  background: boxColor,
+                  borderRadius: '3px',
+               })
                setStyle(box, {
                   opacity: .3,
                })
@@ -864,23 +1065,17 @@
       class Game {
          finished = false;
 
-         async start() {
-            await this.reset()
-            console.log("after reset", state)
-
+         start() {
+            this.reset()
+            Menu.hide();
             Layout.init();
             Figure.drawFigures()
-
          }
 
          lose() {
             this.finished = true;
             setTimeout(async () => {
-               alert("Oh no. You lost the game")
-               let yes = await confirm("Would you like to play it again ?")
-               if (yes) {
-                  this.start()
-               }
+               Menu.show()
             }, 700)
 
          }
@@ -893,12 +1088,58 @@
          }
       }
 
+      class Menu {
+         static show() {
+            $('backdrop').className = 'fallDown'
+         }
+
+         static hide() {
+            $('backdrop').className = 'fallUp'
+         }
+
+         static init() {
+            ['start', 'options', 'upgrade', 'about'].forEach(button => {
+               let result = `
+                  <div class='menu-button' onclick='game.start()'>
+                     <div class='inner-button'>
+                        <div class='button-background'>
+                           <div style='display:flex'>
+                              <div class='circle'></div>
+                              <span class='text'>
+                                  ${button}
+                              </span>
+                           </div>
+                        </div>
+                  </div>
+               </div>`
+
+               $('menu-buttons').innerHTML += result
+            })
+         }
+      }
+
    </script>
 </head>
 
 <body>
-   <p id="dd">gjg</p>
-   <p id="vv">gg</p>
+   <p id="dd"></p>
+   <p id="vv"></p>
+
+   <div class='fallDown' id='backdrop' style="z-index: 1;">
+      <div class='menu-buttons' id='menu-buttons'>
+
+      </div>
+   </div>
+
+   <div class='navbar'>
+      <img src='images/log.png' height='40' style='margin: 5px;margin-left: 5%;' />
+      <p class='my-font' style='margin-left: 15px; padding-top: 3px'> My Game </p>
+      <div class='score'>
+          <p class='my-font best' style='margin-right: 20px'> 1045 </p>
+          <img src='/images/trophy.png' height="40" style='padding-top: 3px'/>
+          <p class='my-font' id='score' style='margin-left: 20px' > 0 </p> 
+      </div>
+   </div>
 
    <div class="header" id="header">
 
@@ -934,6 +1175,7 @@
       let boxesArray = [];
       const figureOffsetX = -70
       const figureOffsetY = -200
+      const boxColor = 'rgba(153, 93, 93)';
    </script>
 
    <script type="text/javascript">
@@ -943,11 +1185,10 @@
          offsetX = (offsetX + roffsetX) / 2 + 20;
       }
 
+      
       let game = new Game();
-      (() => {
-         game.start();
-      })()
-
+      Menu.init()
+      
 
    </script>
 </body>
