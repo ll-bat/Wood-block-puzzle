@@ -511,7 +511,7 @@
 
          static drawFigure(figureType) {
             let type = figureType;
-            figure = FIGURES[type].figure
+            let figure = FIGURES[type].figure
             figure = figure.split("\n")
                .map(c => c.trim())
                .filter(c => c)
