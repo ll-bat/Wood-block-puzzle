@@ -768,21 +768,28 @@
             state.isDrawable = {}
             placeFinder.checkAll(state.allFigures)
             // console.log(state.isDrawable)
-            Score.update()
+            score.update()
          }
       }
 
+      let painter = new Painter();
+
       class Score {
-         static async update(score = 15) {
+          score = 0;
+          maxScore = 0;
+
+          async update(score = 15) {
             const num = Math.floor(Math.random() * score) + 7
             const parts = Math.floor(Math.random() * 7)
 
+            this.score += num;
+
             for (let i=0; i< parts; i++) {
-               await Score.add(Math.floor(num / parts))
+               await this.add(Math.floor(num / parts))
             }
          }
 
-         static add(cnt) {
+          add(cnt) {
               return new Promise((res, rej) => {
                  setTimeout(() => {
                     let score = $('score').innerText
@@ -794,12 +801,26 @@
               })
          }
 
-         static reset() {
+          reset() {
+            this.score = 0;
             $('score').innerText = '0';
+            this.maxScore = this.getMaxScore();
+            $('max-score').innerText = this.maxScore;
+         }
+
+          getMaxScore() {
+            let score = !!localStorage.getItem('max-score') ? localStorage.getItem('max-score') : 0;
+            return score.toString();
+         }
+
+          updateMaxScore() {
+            if (this.score > this.maxScore) {
+               localStorage.setItem('max-score', this.score)
+            }
          }
       }
 
-      let painter = new Painter();
+      const score = new Score();
 
       class Remover {
          onRow = [];
@@ -853,7 +874,7 @@
                }
             }
 
-            if (isRemoved) Score.update(50)
+            if (isRemoved) score.update(50)
             // console.log("column", this.onColumn);
             // console.log("row", this.onRow);
          }
@@ -869,7 +890,7 @@
                box.busy = false;
 
                setStyle(box.div, {
-                  background: 'cyan',
+                  background: blockCrashColor,
                })
 
                setTimeout(() => {
@@ -975,6 +996,7 @@
                Figure.draw(figure, boxWidth * .96, boxHeight * .96, $("figure"),
                {
                   background: boxColor,
+                  border: '2px solid grey',
                   borderRadius: '3px',
                })
                setStyle(box, {
@@ -1074,6 +1096,7 @@
 
          lose() {
             this.finished = true;
+            score.updateMaxScore();
             setTimeout(async () => {
                Menu.show()
             }, 700)
@@ -1081,6 +1104,7 @@
          }
 
          reset() {
+            score.reset()
             state.reset();
             remover.reset();
             figureHelper.reset();
@@ -1135,7 +1159,7 @@
       <img src='images/log.png' height='40' style='margin: 5px;margin-left: 5%;' />
       <p class='my-font' style='margin-left: 15px; padding-top: 3px'> My Game </p>
       <div class='score'>
-          <p class='my-font best' style='margin-right: 20px'> 1045 </p>
+          <p class='my-font best' id='max-score' style='margin-right: 20px'> -- </p>
           <img src='/images/trophy.png' height="40" style='padding-top: 3px'/>
           <p class='my-font' id='score' style='margin-left: 20px' > 0 </p> 
       </div>
@@ -1176,6 +1200,7 @@
       const figureOffsetX = -70
       const figureOffsetY = -200
       const boxColor = 'rgba(153, 93, 93)';
+      const blockCrashColor = 'rgba(102, 46, 11)';
    </script>
 
    <script type="text/javascript">
