@@ -25,7 +25,7 @@
          top: 200px;
       }
 
-      .estimated-figure {
+      .tmp-figure {
          position: absolute;
       }
 
@@ -89,7 +89,8 @@
       #backdrop {
          width: 100%;
          margin-top: -20px;
-         margin-left: -20px;;
+         margin-left: -20px;
+         ;
          position: absolute;
          background-color: #030e1d;
          transition: all 4s ease-in;
@@ -183,10 +184,10 @@
       .my-font {
          font-family: 'Courier New', Courier, monospace;
          color: white;
-      } 
+      }
 
       .score {
-         margin-left: auto; 
+         margin-left: auto;
          margin-right: 5%;
          display: flex;
          padding: 10px;
@@ -196,6 +197,122 @@
       .best {
          color: orange;
          text-shadow: 2px 2px 4px #0E1318;
+      }
+
+      @keyframes _boxCrashing1 {
+         0% {
+            transform: translateY(0px) translateX(0px) rotate(0deg);
+         }
+
+         25% {
+            transform: translateY(-150px) translateX(-60px) rotate(-90deg) scale(.7);
+         }
+
+         100% {
+            transform: translateY(300px) translateX(-240px) rotate(-360deg) scale(.1);
+            opacity: 0;
+            display: none;
+         }
+      }
+
+      .box-crashing-1 {
+         animation: _boxCrashing1 1.1s ease-in-out;
+         animation-fill-mode: forwards;
+      }
+
+
+      @keyframes _boxCrashing2 {
+         0% {
+            transform: translateY(0px) translateX(0px) rotate(0deg);
+         }
+
+         25% {
+            transform: translateY(-150px) translateX(60px) rotate(90deg) scale(.7);
+         }
+
+         100% {
+            transform: translateY(300px) translateX(240px) rotate(360deg) scale(.1);
+            opacity: 0;
+            display: none;
+         }
+      }
+
+      .box-crashing-2 {
+         animation: _boxCrashing2 1.1s ease-in-out;
+         animation-fill-mode: forwards;
+      }
+
+      @keyframes _boxCrashing3 {
+         0% {
+            transform: translateY(0px) translateX(0px) rotate(0deg);
+         }
+
+         25% {
+            transform: translateY(-50px) translateX(-100px) rotate(-90deg) scale(.7);
+            transform-style: preserve-3d;
+         }
+
+         100% {
+            transform: translateY(400px) translateX(-300px) rotate(-360deg) scale(.1);
+            transform-style: preserve-3d;
+            
+            opacity: 0;
+            display: none;
+         }
+      }
+
+      .box-crashing-3 {
+         animation: _boxCrashing3 1.1s ease-in-out;
+         animation-fill-mode: forwards;
+      }
+
+      @keyframes _boxCrashing4 {
+         0% {
+            transform: translateY(0px) translateX(0px) rotate(0deg);
+         }
+
+         25% {
+            transform: translateY(-50px) translateX(100px) rotate(90deg) scale(.7);
+            transform-style: preserve-3d;
+            
+         }
+
+         100% {
+            transform: translateY(400px) translateX(500px) rotate(360deg) scale(.1);
+            transform-style: preserve-3d;
+            opacity: 0;
+            display: none;
+         }
+      }
+
+      .box-crashing-4 {
+         animation: _boxCrashing4 1.1s ease-in-out;
+         animation-fill-mode: forwards;
+      }
+
+      @keyframes _boxCrashingTest {
+         0% {transform: translateY(0px) translateX(0px) rotate(0deg);}
+         5% {transform: translateY(-15px) translateX(-6px) rotate(9deg) scale(.97)}
+         10%{transform: translateY(-30px) translateX(-12px) rotate(18deg) scale(.95); }
+         15%{transform: translateY(-45px) translateX(-18px) rotate(27deg) scale(.92)}
+         20%{transform: translateY(-60px) translateX(-24px) rotate(36deg) scale(.9); }
+         25%{transform: translateY(-75px) translateX(-30px) rotate(45deg) scale(.87)}
+         30%{transform: translateY(-90px) translateX(-36px) rotate(54deg) scale(.85); }
+         35%{transform: translateY(-105px) translateX(-42px) rotate(63deg) scale(.82); }
+         40%{transform: translateY(-120px) translateX(-48px) rotate(72deg) scale(.8); }
+         45%{transform: translateY(-135px) translateX(-54px) rotate(81deg) scale(.77); }
+         50%{transform: translateY(-150px) translateX(-60px) rotate(90deg) scale(.75); }
+
+         100% {
+            transform: translateY(150px) translateX(-120px) rotate(360deg) scale(.1);
+            opacity: 0;
+            display: none;
+         }
+      }
+
+      .box-crashing-test {
+         animation: _boxCrashingTest .6s ease-in-out;
+         animation-fill-mode: forwards;
       }
 
       /* #0E1318 */
@@ -673,7 +790,7 @@
                return;
             }
 
-            let box = $('estimated-figure')
+            let box = $('tmp-figure')
             let block = boxesArray[x][y];
             let [x1, y1] = [block.x, block.y];
 
@@ -687,7 +804,7 @@
          }
 
          clearTmpFigure() {
-            $('estimated-figure').innerHTML = "";
+            $('tmp-figure').innerHTML = "";
          }
 
          canBeDrawn({ x, y }, figure) {
@@ -775,45 +892,45 @@
       let painter = new Painter();
 
       class Score {
-          score = 0;
-          maxScore = 0;
+         score = 0;
+         maxScore = 0;
 
-          async update(score = 15) {
+         async update(score = 15) {
             const num = Math.floor(Math.random() * score) + 7
             const parts = Math.floor(Math.random() * 7)
 
             this.score += num;
 
-            for (let i=0; i< parts; i++) {
+            for (let i = 0; i < parts; i++) {
                await this.add(Math.floor(num / parts))
             }
          }
 
-          add(cnt) {
-              return new Promise((res, rej) => {
-                 setTimeout(() => {
-                    let score = $('score').innerText
-                    score = parseInt(score)
-                    score += cnt 
-                    $('score').innerText = score.toString()
-                    res()
-                 }, 70)
-              })
+         add(cnt) {
+            return new Promise((res, rej) => {
+               setTimeout(() => {
+                  let score = $('score').innerText
+                  score = parseInt(score)
+                  score += cnt
+                  $('score').innerText = score.toString()
+                  res()
+               }, 70)
+            })
          }
 
-          reset() {
+         reset() {
             this.score = 0;
             $('score').innerText = '0';
             this.maxScore = this.getMaxScore();
             $('max-score').innerText = this.maxScore;
          }
 
-          getMaxScore() {
+         getMaxScore() {
             let score = !!localStorage.getItem('max-score') ? localStorage.getItem('max-score') : 0;
             return score.toString();
          }
 
-          updateMaxScore() {
+         updateMaxScore() {
             if (this.score > this.maxScore) {
                localStorage.setItem('max-score', this.score)
             }
@@ -849,7 +966,7 @@
          cleanUp() {
             let removedColumns = 0;
             let isRemoved = false;
-          
+
             for (let i = 0; i < boxesOnColumn; i++) {
                if (this.onColumn[i] === boxesOnColumn) {
                   this.remove(i, boxesOnRow, 'row');
@@ -889,16 +1006,16 @@
                if (!box.busy) continue;
                box.busy = false;
 
-               setStyle(box.div, {
-                  background: blockCrashColor,
-               })
+               // setStyle(box.div, {
+               //    background: blockCrashColor,
+               // })
 
-               setTimeout(() => {
-                  setStyle(box.div, {
-                     background: '#1E1E1E',
-                     border: '2px solid black'
-                  })
-               }, 300)
+               blockAnim.animateCrash(box)
+
+               setStyle(box.div, {
+                  background: '#1E1E1E',
+                  border: '2px solid black'
+               })
             }
          }
 
@@ -994,11 +1111,11 @@
                })
 
                Figure.draw(figure, boxWidth * .96, boxHeight * .96, $("figure"),
-               {
-                  background: boxColor,
-                  border: '2px solid grey',
-                  borderRadius: '3px',
-               })
+                  {
+                     background: boxColor,
+                     border: '2px solid grey',
+                     borderRadius: '3px',
+                  })
                setStyle(box, {
                   opacity: .3,
                })
@@ -1097,7 +1214,7 @@
          lose() {
             this.finished = true;
             score.updateMaxScore();
-            setTimeout(async () => {
+            setTimeout(() => {
                Menu.show()
             }, 700)
 
@@ -1142,6 +1259,139 @@
          }
       }
 
+      class BlockCrashAnimation {
+         WITH_TRANSFORMATIONS = 'withTransform'
+         PARABOLIC_CURVE = 'parabolicCurve'
+
+         types = [
+            this.WITH_TRANSFORMATIONS,
+            this.PARABOLIC_CURVE,
+         ]
+
+         animateCrash({ x, y }) {
+            this.run(
+               this.draw({ x, y })
+            )
+         }
+
+         draw({ x, y }) {
+            let el = elt('div', null, null, {
+               position: 'absolute',
+               left: x + 'px',
+               top: y + 'px',
+               width: boxWidth + 'px',
+               height: boxHeight + 'px',
+               background: boxColor,
+               border: '2px inset black',
+            })
+            dom.body.append(el)
+            return el             
+         }
+
+         run(el) {
+            let r = Math.floor(Math.random() * this.types.length)
+            let type = this.types[r]
+
+            this[type](el)
+         }
+
+         async parabolicCurve(el) {
+            const steps = 40
+            const clockWise = Math.random() > .5 ? 1 : -1
+            const startX = 0
+            const endX = 10
+            const xPerStep = (endX / steps) 
+            let currentStep = steps 
+            let currentX = 0
+            let currentY = equation(currentX)
+            let currentOpacity = 1
+            let currentScale = 1
+            const perStep = 1 / steps
+            
+            while (currentStep--) {
+               setStyle(el, {
+                  transform: `
+                     translateX(${currentX}px)
+                     translateY(${currentY}px)
+                     scale(${currentScale})
+                  `,
+                  opacity: currentOpacity
+               })
+               currentX += clockWise * xPerStep * (Math.sin(currentStep / steps) * 1.6 + .2)
+               currentY  = equation(currentX)
+               currentOpacity -= perStep
+               currentScale -= perStep / 2
+
+               await this.wait(10)
+            }
+
+            function equation(x) {
+               return 1 * .06 * x * x * x + 10
+            }
+
+            el.remove()
+         }
+
+ 
+         async withTransform(el) {
+            const steps = 150
+            const clockWise = Math.random() > .5 ? 1 : -1
+            const startDegree = -90 + clockWise * 85
+            const endDegree = startDegree + clockWise * ( Math.random() * 30 + 20 )
+            const degreePerStep = clockWise * (Math.abs(endDegree - startDegree) / steps)
+            const distPerStep = 1.5
+            const perStep = 1 / steps
+            let currentDegree = startDegree;
+            let currentDist = distPerStep 
+            let currentStep = steps 
+            let currentOpacity = 1
+            let currentScale = 1
+
+            while (currentStep--) {
+                setStyle(el, {
+                   transform: `
+                      rotate(${currentDegree}deg)
+                      translateX(${currentDist}px)
+                      scale(${currentScale})
+                   `,
+                   opacity: currentOpacity
+                })
+                currentDegree += degreePerStep
+                currentDist += distPerStep * Math.sin(currentStep / steps) * 2
+                currentOpacity -= perStep
+                currentScale -= perStep / 2
+
+                await this.wait(2)
+            }
+             
+            el.remove()
+         }
+
+         wait(time) {
+            return new Promise((res) => {
+               setTimeout(() => {
+                  res()
+               }, time)
+            })
+         }
+
+         // getClassname() {
+         //    let randnum = Math.random();
+         //    let className = 'box-crashing-1';
+         //    if (randnum < .5) {
+         //       className = 'box-crashing-2';
+         //    } else if (randnum < .75) {
+         //       className = 'box-crashing-3';
+         //    } else {
+         //       className = 'box-crashing-4'
+         //    }
+         //    // return className
+         //    return 'box-crashing-test'
+         // }
+      }
+
+      const blockAnim = new BlockCrashAnimation()
+
    </script>
 </head>
 
@@ -1159,9 +1409,9 @@
       <img src='images/log.png' height='40' style='margin: 5px;margin-left: 5%;' />
       <p class='my-font' style='margin-left: 15px; padding-top: 3px'> My Game </p>
       <div class='score'>
-          <p class='my-font best' id='max-score' style='margin-right: 20px'> -- </p>
-          <img src='/images/trophy.png' height="40" style='padding-top: 3px'/>
-          <p class='my-font' id='score' style='margin-left: 20px' > 0 </p> 
+         <p class='my-font best' id='max-score' style='margin-right: 20px'> -- </p>
+         <img src='/images/trophy.png' height="40" style='padding-top: 3px' />
+         <p class='my-font' id='score' style='margin-left: 20px'> 0 </p>
       </div>
    </div>
 
@@ -1181,7 +1431,7 @@
 
    </div>
 
-   <div class='estimated-figure' id='estimated-figure'>
+   <div class='tmp-figure' id='tmp-figure'>
 
    </div>
 
@@ -1205,15 +1455,16 @@
 
    <script type="text/javascript">
       {
-         let roffsetX = offsetX + boxesOnRow * boxWidth
-         roffsetX = width - roffsetX;
-         offsetX = (offsetX + roffsetX) / 2 + 20;
+         let rightOffsetX = offsetX + boxesOnRow * boxWidth
+         rightOffsetX = width - rightOffsetX;
+         offsetX = (offsetX + rightOffsetX) / 2 + 20;
       }
 
-      
+
       let game = new Game();
-      Menu.init()
-      
+      // Menu.init()
+      game.start()
+
 
    </script>
 </body>
