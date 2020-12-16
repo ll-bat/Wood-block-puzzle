@@ -316,6 +316,9 @@
       }
 
       /* #0E1318 */
+      .asf {
+         color: rgb(151, 96, 96);
+      }
    </style>
 
    <script>
@@ -1270,7 +1273,8 @@
 
          animateCrash({ x, y }) {
             this.run(
-               this.draw({ x, y })
+               this.draw({ x, y }),
+               { x, y }
             )
          }
 
@@ -1281,39 +1285,50 @@
                top: y + 'px',
                width: boxWidth + 'px',
                height: boxHeight + 'px',
-               background: boxColor,
+               background: blockCrashColor,
                border: '2px inset black',
             })
             dom.body.append(el)
             return el             
          }
 
-         run(el) {
-            let r = Math.floor(Math.random() * this.types.length)
-            let type = this.types[r]
+         run(el, boxCoordinates) {
+            /*
+              let r = Math.floor(Math.random() * this.types.length)
+              let type = this.types[r]
 
-            this[type](el)
+              this[type](el, o) 
+            */
+ 
+             this.parabolicCurve(el, boxCoordinates)
          }
 
-         async parabolicCurve(el) {
-            const steps = 40
+         async parabolicCurve(el, { x, y }) {
+            const steps = 55
             const clockWise = Math.random() > .5 ? 1 : -1
             const startX = 0
-            const endX = 10
+            const endX = 20
             const xPerStep = (endX / steps) 
             let currentStep = steps 
             let currentX = 0
             let currentY = equation(currentX)
             let currentOpacity = 1
             let currentScale = 1
+            const addX = 100 * clockWise;
+            const addY = Math.random() * 100;
+            let posX = 0;
+            let posY = 0;
             const perStep = 1 / steps
+            let degree = 0;
+            const degPerStep = 6 * clockWise;
             
             while (currentStep--) {
                setStyle(el, {
+                  left: currentX + posX +  x + 'px',
+                  top: currentY + posY +  y + 'px',
                   transform: `
-                     translateX(${currentX}px)
-                     translateY(${currentY}px)
-                     scale(${currentScale})
+                   scale(${currentScale}) 
+                   rotate(${degree}deg)
                   `,
                   opacity: currentOpacity
                })
@@ -1321,18 +1336,19 @@
                currentY  = equation(currentX)
                currentOpacity -= perStep
                currentScale -= perStep / 2
-
+               posX = addX * Math.cos(currentStep / steps)
+               posY = addY * Math.cos(currentStep / steps)
+               degree += degPerStep * Math.cos(currentStep / steps)
                await this.wait(10)
             }
 
             function equation(x) {
-               return 1 * .06 * x * x * x + 10
+               return 1.46 * x * x + 10
             }
 
             el.remove()
          }
 
- 
          async withTransform(el) {
             const steps = 150
             const clockWise = Math.random() > .5 ? 1 : -1
@@ -1360,7 +1376,6 @@
                 currentDist += distPerStep * Math.sin(currentStep / steps) * 2
                 currentOpacity -= perStep
                 currentScale -= perStep / 2
-
                 await this.wait(2)
             }
              
@@ -1374,20 +1389,6 @@
                }, time)
             })
          }
-
-         // getClassname() {
-         //    let randnum = Math.random();
-         //    let className = 'box-crashing-1';
-         //    if (randnum < .5) {
-         //       className = 'box-crashing-2';
-         //    } else if (randnum < .75) {
-         //       className = 'box-crashing-3';
-         //    } else {
-         //       className = 'box-crashing-4'
-         //    }
-         //    // return className
-         //    return 'box-crashing-test'
-         // }
       }
 
       const blockAnim = new BlockCrashAnimation()
@@ -1450,7 +1451,7 @@
       const figureOffsetX = -70
       const figureOffsetY = -200
       const boxColor = 'rgba(153, 93, 93)';
-      const blockCrashColor = 'rgba(102, 46, 11)';
+      const blockCrashColor = 'rgb(151, 96, 96)';
    </script>
 
    <script type="text/javascript">
