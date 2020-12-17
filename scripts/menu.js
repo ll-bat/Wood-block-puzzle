@@ -1,15 +1,15 @@
 class Menu {
-         static show() {
-            $('backdrop').className = 'fallDown'
-         }
+   static show() {
+      $('backdrop').className = 'fallDown'
+   }
 
-         static hide() {
-            $('backdrop').className = 'fallUp'
-         }
+   static hide() {
+      $('backdrop').className = 'fallUp'
+   }
 
-         static init() {
-            ['start', 'options', 'upgrade', 'about'].forEach(button => {
-               let result = `
+   static init() {
+      ['start', 'options', 'upgrade', 'about'].forEach(button => {
+         let result = `
                   <div class='menu-button' onclick='game.start()'>
                      <div class='inner-button'>
                         <div class='button-background'>
@@ -23,7 +23,7 @@ class Menu {
                   </div>
                </div>`
 
-               $('menu-buttons').innerHTML += result
-            })
-         }
-      }
+         $('menu-buttons').innerHTML += result
+      })
+   }
+}
