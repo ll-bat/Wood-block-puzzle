@@ -94,15 +94,11 @@
          }
 
          update() {
-            let removed = false;
-            state.allFigures = state.allFigures.filter(({ type }) => {
-               if (removed) return true;
-               removed = (type === state.type)
-               return !removed
+            state.allFigures = state.allFigures.filter(({ boxDiv }) => {
+                return boxDiv === state.div
             })
             state.isDrawable = {}
             placeFinder.checkAll(state.allFigures)
-            // console.log(state.isDrawable)
             score.update()
          }
       }

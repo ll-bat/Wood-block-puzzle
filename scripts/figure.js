@@ -22,10 +22,12 @@
             let randomFigures = [];
 
             for (let i = 0; i < cnt; i++) {
-               let ind = Math.floor(Math.random() * len);
+               // let ind = Math.floor(Math.random() * len);
+               let ind = 5;
                randomFigures.push(keys[ind]);
             }
             return randomFigures;
+
          }
 
          static drawFigures() {
