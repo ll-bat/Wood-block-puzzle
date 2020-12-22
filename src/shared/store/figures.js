@@ -64,21 +64,21 @@ const FIGURES = {
              `,
     },
 
-    TYPE_10: {
+    TYPE_11: {
         figure: `
               .#
               ##
              `
     },
 
-    TYPE_10: {
+    TYPE_12: {
         figure: `
             # 
             #
            `
     },
 
-    TYPE_10: {
+    TYPE_13: {
         figure: `
           ##          
          `
